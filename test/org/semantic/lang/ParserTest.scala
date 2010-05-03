@@ -12,6 +12,17 @@ class ParserTest extends MatlabParser with Spec with ShouldMatchers {
 
   describe("MATLAB parser") {
 
+    it("should parse integer, float and string literals") {
+      val in = """
+      42;
+      239.05; ;
+      'abc'
+      """
+      val out = "MSeq(List(IntNum(42), FloatNum(239.0500030517578), MString(abc)))"
+      parse(in).get.toString should equal(out)
+    }
+
+
     it("should parse conditional expressions") {
 
       val in = """

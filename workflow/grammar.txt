@@ -1,0 +1,19 @@
+# Core MATLAB program syntax summary #
+
+
+MProgram    ::=   MSeq
+
+MSeq        ::=   MStmt {";" MStmt}
+
+MStmt       ::=   Assign
+                | IfStmt
+                | Expr
+
+Expr        ::=   SimpleExpr
+
+SimpleExpr  ::=   Var
+                | IntegerLiteral
+                | FloatLiteral
+                | StringLiteral
+                | "(" Expr ")"
+

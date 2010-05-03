@@ -9,6 +9,7 @@ import org.semantic.lang.syntax._
 
 class MatlabParser extends StandardTokenParsers {
   override val lexical = new MatlabLexical
+  import lexical._
 
   lexical.delimiters += ("(", ")", "=", ".", "[", "]", ";", ",")
   lexical.reserved += ("function", "for", "end", "if",
@@ -18,7 +19,9 @@ class MatlabParser extends StandardTokenParsers {
   seq        
   )
 
-  def seq: Parser[MSeq] = repsep(stmt, ";") ^^ {case List(stmts @ _*) => MSeq(stmts)}
+  def seq: Parser[MSeq] = repsep(stmt, separators) ^^ {case List(stmts @ _*) => MSeq(stmts)}
+
+  def separators = rep1(";") 
 
   def stmt : Parser[MStmt] = (
     ident ~ expr ^^ {case i ~ e => Asgn(Id(i), e)}
@@ -40,9 +43,18 @@ class MatlabParser extends StandardTokenParsers {
 
   def simpleExpr: Parser[MExp] = (
     ident ^^ Var
+  | floatLiteral
+  | intLiteral
   | "(" ~> expr <~ ")"
-  //  | stringLit ^^ StringLiteral
+  | stringLit ^^ MString
   )
+
+  def intLiteral: Parser[IntNum] =
+    elem("integer", _.isInstanceOf[IntegerLit]) ^^ (x => IntNum(Integer.parseInt(x.chars)))
+
+  def floatLiteral: Parser[FloatNum] =
+    elem("float", _.isInstanceOf[FloatLit]) ^^ (x => FloatNum(java.lang.Float.parseFloat(x.chars)))
+
 
 
   // Scanner is imported from STLCLexer, which is an inheritor of Scanners

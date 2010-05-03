@@ -10,7 +10,7 @@ abstract class MExp extends MStmt
 
 case class IntNum (i : Int) extends MExp
 case class FloatNum (f : Double) extends MExp
-case class StringLiteral (s : String) extends MExp
+case class MString (s : String) extends MExp
 
 case class Var (s : String) extends MExp
 
