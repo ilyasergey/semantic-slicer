@@ -11,9 +11,15 @@ MStmt       ::=   Assign
 
 Expr        ::=   SimpleExpr
 
+AddExpr     ::=   MultExpr
+                | AddExpr ("+" | "-") MultExpr
+
+MultExpr    :: =  SimpleExpr
+                | MultExpr ("*" | "/") SimpleExpr
+
 SimpleExpr  ::=   Var
-                | IntegerLiteral
                 | FloatLiteral
+                | IntegerLiteral
                 | StringLiteral
                 | "(" Expr ")"
 

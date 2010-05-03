@@ -11,7 +11,8 @@ class MatlabParser extends StandardTokenParsers {
   override val lexical = new MatlabLexical
   import lexical._
 
-  lexical.delimiters += ("(", ")", "=", ".", "[", "]", ";", ",")
+  lexical.delimiters += ("(", ")", "=", ".", "[", "]", ";",
+          ",", "*", "/", "+", "-")
   lexical.reserved += ("function", "for", "end", "if",
           "else", "elseif", "continue", "while", "break")
 
@@ -38,8 +39,23 @@ class MatlabParser extends StandardTokenParsers {
   )
 
   def expr: Parser[MExp] = (
-    simpleExpr
+    addExpr
   )
+
+  def addExpr: Parser[MExp] = multExpr ~ rep(("+" | "-") ~ multExpr) ^^ {case s ~ l =>
+    l.foldLeft(s)((x, y) => y match {
+      case "+" ~ e => Add(x, e)
+      case "-" ~ e => Sub(x, e)
+    })
+  }
+
+  def multExpr: Parser[MExp] = simpleExpr ~ rep(("*" | "/") ~ simpleExpr) ^^ {case s ~ l =>
+    l.foldLeft(s)((x, y) => y match {
+      case "*" ~ e => Mul(x, e)
+      case "/" ~ e => Div(x, e)
+    })
+  }
+
 
   def simpleExpr: Parser[MExp] = (
     ident ^^ Var
