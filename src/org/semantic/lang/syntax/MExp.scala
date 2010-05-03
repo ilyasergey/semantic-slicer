@@ -6,10 +6,14 @@ package org.semantic.lang.syntax
  * Standard MATLAB expression
  */
 
-abstract class MExp
+abstract class MExp extends MStmt
 
-case class Num (d : Int) extends MExp
+case class IntNum (i : Int) extends MExp
+case class FloatNum (f : Double) extends MExp
+case class StringLiteral (s : String) extends MExp
+
 case class Var (s : String) extends MExp
+
 case class Neg (e : MExp) extends MExp
 case class Add (l : MExp, r : MExp) extends MExp
 case class Sub (l : MExp, r : MExp) extends MExp
