@@ -12,6 +12,16 @@ class ParserTest extends MatlabParser with Spec with ShouldMatchers {
 
   describe("MATLAB parser") {
 
+/*
+    it("should parse transposition") {
+      val in = """
+      a'
+      """
+      val out = ""
+      parse(in).get.toString should equal(out)
+    }
+*/
+
     it("should parse multiplication and division") {
       val in = """
       2 * 3 / 4 * 5
