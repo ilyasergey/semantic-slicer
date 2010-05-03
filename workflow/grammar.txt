@@ -9,7 +9,7 @@ MStmt       ::=   Assign
                 | IfStmt
                 | Expr
 
-Expr        ::=   SimpleExpr
+Expr        ::=   AddExpr
 
 AddExpr     ::=   MultExpr
                 | AddExpr ("+" | "-") MultExpr
