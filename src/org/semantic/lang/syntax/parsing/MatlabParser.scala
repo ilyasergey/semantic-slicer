@@ -12,7 +12,7 @@ class MatlabParser extends StandardTokenParsers {
   import lexical._
 
   lexical.delimiters += ("(", ")", "=", ".", "[", "]", ";",
-          ",", "*", "/", "+", "-")
+          ",", "*", "/", "+", "-", "^")
   lexical.reserved += ("function", "for", "end", "if",
           "else", "elseif", "continue", "while", "break")
 
@@ -49,13 +49,15 @@ class MatlabParser extends StandardTokenParsers {
     })
   }
 
-  def multExpr: Parser[MExp] = simpleExpr ~ rep(("*" | "/") ~ simpleExpr) ^^ {case s ~ l =>
+  def multExpr: Parser[MExp] = powerExpr ~ rep(("*" | "/") ~ powerExpr) ^^ {case s ~ l =>
     l.foldLeft(s)((x, y) => y match {
       case "*" ~ e => Mul(x, e)
       case "/" ~ e => Div(x, e)
     })
   }
 
+  def powerExpr: Parser[MExp] = simpleExpr ~ rep("^" ~ simpleExpr) ^^ {case s ~ l =>
+      (s /: l)((x, y) => y match {case "^" ~ e => Pow(x,e)})}
 
   def simpleExpr: Parser[MExp] = (
     ident ^^ Var

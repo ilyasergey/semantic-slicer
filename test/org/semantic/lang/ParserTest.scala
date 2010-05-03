@@ -28,6 +28,14 @@ class ParserTest extends MatlabParser with Spec with ShouldMatchers {
       parse(in).get.toString should equal(out)
     }
 
+    it("should parse power exprs") {
+      val in = """
+      2 ^ (3 - 1)
+      """
+      val out = "MSeq(List(Pow(IntNum(2),Sub(IntNum(3),IntNum(1)))))"
+      parse(in).get.toString should equal(out)
+    }
+
     it("should parse integer, float and string literals") {
       val in = """
       42;

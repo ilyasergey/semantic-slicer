@@ -14,8 +14,11 @@ Expr        ::=   AddExpr
 AddExpr     ::=   MultExpr
                 | AddExpr ("+" | "-") MultExpr
 
-MultExpr    :: =  SimpleExpr
+MultExpr    :: =  PowerExpr
                 | MultExpr ("*" | "/") SimpleExpr
+
+PowerExpr   ::=   SimpleExpr
+                | PowerExpr "^" SimpleExpr
 
 SimpleExpr  ::=   Var
                 | FloatLiteral
