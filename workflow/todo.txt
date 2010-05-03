@@ -3,10 +3,13 @@ TODO list for semantic slicing project
 
 1. Implement simple imperative language using Kiama library
     Syntax:
-       assignments
        while,
-       if
+       for
        function calls
+       -------------
+       transposition
+       dot-notation
+       functions
        
 
 2. Reference binding for local variables
