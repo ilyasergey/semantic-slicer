@@ -3,6 +3,7 @@ TODO list for semantic slicing project
 
 1. Implement simple imperative language using Kiama library
     Syntax:
+       vector assignment
        transposition
        dot-notation for vectors
        functions
