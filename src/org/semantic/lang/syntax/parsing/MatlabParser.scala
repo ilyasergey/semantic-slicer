@@ -34,7 +34,7 @@ class MatlabParser extends StandardTokenParsers {
   def newline: Parser[Any] = rep1("\n" | "\r")
   def optnl: Parser[Any] = opt(newline)
 
-  def asgn: Parser[Asgn] = (ident <~ "=") ~ expr ^^ {case i ~ e => Asgn(Id(i), e)}
+  def asgn: Parser[Asgn] = (ident <~ "=") ~ expr ^^ {case i ~ e => Asgn(Var(i), e)}
 
   def stmt : Parser[MStmt] = (
       asgn

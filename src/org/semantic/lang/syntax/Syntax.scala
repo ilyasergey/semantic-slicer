@@ -29,8 +29,8 @@ case class MSeq(ss: Seq[MStmt]) extends MStmt
 case class IfStmt(thenBranches: Seq[(MExp, MStmt)], elseBranch: Option[MStmt]) extends MStmt
 case class While(c: MExp, b: MStmt) extends MStmt with LoopStmt
 case class ForStmt(a: Asgn, body: MStmt) extends MStmt with LoopStmt
-case class Asgn(name: Id, e: MExp) extends MStmt
-case class ListAsgn(names: Seq[Id], e: MExp) extends MStmt
+case class Asgn(name: Var, e: MExp) extends MStmt
+case class ListAsgn(names: Seq[Var], e: MExp) extends MStmt
 case object Return extends MStmt
 case object Break extends MStmt
 case object Continue extends MStmt

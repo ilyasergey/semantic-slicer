@@ -92,13 +92,63 @@ trait Variables {
   /**
    * Variable uses.
    */
-  val uses: MStmt ==> Set[Id]
+  val uses: MStmt ==> Set[Var]
 
   /**
    * Variable definitions.
    */
-  val defines: MStmt ==> Set[Id]
+  val defines: MStmt ==> Set[Var]
+}
+
+trait VariablesImpl extends Variables {
+  val uses: MStmt ==> Set[Var] =
+  attr {
+    case v@Var("s") => Set(v)
+    case _ => Set()
+  }
+
+  val defines: MStmt ==> Set[Var] =
+  attr {
+    case Asgn(v, _) => Set(v)
+    case _ => Set()
+  }
+
+}
+
+/**
+ * Variable liveness interface.
+ */
+trait Liveness {
+
+  /**
+   * Variables "live" into a statement.
+   */
+  val in: MStmt ==> Set[Var]
+
+  /**
+   * Variables "live" out of a statement.
+   */
+  val out: MStmt ==> Set[Var]
+
+}
+
+/**
+ * Variable liveness implementation.
+ */
+trait LivenessImpl extends Liveness {
+  self: Liveness with Variables with ControlFlow =>
+
+  val in: MStmt ==> Set[Var] =
+  circular(Set[Var]()) {
+    case s => uses(s) ++ (out(s) -- defines(s))
+  }
+
+  val out: MStmt ==> Set[Var] =
+  circular(Set[Var]()) {
+    case s => (s -> succ) flatMap (in)
+  }
+
 }
 
 
-object DataFlow extends /*LivenessImpl with VariablesImpl with*/ ControlFlowImpl
+object DataFlow extends LivenessImpl with VariablesImpl with ControlFlowImpl
