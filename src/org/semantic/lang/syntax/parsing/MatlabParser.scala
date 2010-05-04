@@ -11,22 +11,29 @@ class MatlabParser extends StandardTokenParsers {
   override val lexical = new MatlabLexical
   import lexical._
 
-  lexical.delimiters += ("(", ")", "=", ".", "[", "]", ";",
-          ",", "*", "/", "+", "-", "^", "==", "<=", ">=")
+  lexical.delimiters += ("(", ")", "=", ".", "[", "]", ";", ":",
+          ",", "*", "/", "+", "-", "^", "==", "<=", ">=", ">", "<")
+
   lexical.reserved += ("function", "for", "end", "if",
           "else", "elseif", "continue", "while", "break")
 
-  def program: Parser[MSeq] = (
-  seq        
+  def program: Parser[MStmt] = (
+    seq
   )
 
-  def seq: Parser[MSeq] = repsep(stmt, separators) ^^ {case List(stmts @ _*) => MSeq(stmts)}
+  /**
+   * Sequence of statements
+   */
+  def seq: Parser[MStmt] = stmt ~ rep(separators ~> stmt) <~ opt(separators) ^^ {case s ~ l => l match {
+    case List() => s
+    case x => MSeq(s :: x)
+  }}
 
-  def separators = rep1(";") 
+  def separators: Parser[Any] = rep1(";")
 
   def stmt : Parser[MStmt] = (
-    (ident <~ "=") ~ expr ^^ {case i ~ e => Asgn(Id(i), e)}
-  | ("if" ~> expr <~ opt(",")) ~ seq ~ rep("elseif" ~> seq) ~ opt("else" ~> seq) <~ "end" ^^ {
+      (ident <~ "=") ~ expr ^^ {case i ~ e => Asgn(Id(i), e)}
+  ||| ("if" ~> expr <~ opt(",")) ~ seq ~ rep("elseif" ~> seq) ~ opt("else" ~> seq) <~ "end" ^^ {
       case cond ~ tb ~ List(elseIfBranches @ _*) ~ elseBranch => {
         val lastElseBranch = elseBranch match {
           case Some(eb) => Seq(eb)
@@ -35,19 +42,22 @@ class MatlabParser extends StandardTokenParsers {
         IfStmt(cond, tb, elseIfBranches ++ lastElseBranch)
       }
     }
-  | expr
+  ||| expr
   )
 
   def expr: Parser[MExp] = (
     equalExpr
   )
 
-  def equalExpr: Parser[MExp] = addExpr ~ rep(("==" | ">=" | "<=") ~ addExpr) ^^ {case s ~ l =>
+  def equalExpr: Parser[MExp] = rangeExpr ~ rep(("==" | ">=" | "<=" | "<" | ">") ~ rangeExpr) ^^ {case s ~ l =>
     (s /: l)((x, y) => y match {
-      case _ ~ e => Add(x, e)
+      case _ ~ e => Equal(x, e)
     })
   }
 
+  def rangeExpr: Parser[MExp] = (addExpr
+  ||| (addExpr <~ ":") ~ addExpr ^^ {case e1 ~ e2 => Range(e1, e2)}
+  )
 
   def addExpr: Parser[MExp] = multExpr ~ rep(("+" | "-") ~ multExpr) ^^ {case s ~ l =>
     l.foldLeft(s)((x, y) => y match {
@@ -66,6 +76,7 @@ class MatlabParser extends StandardTokenParsers {
   def powerExpr: Parser[MExp] = transpExpr ~ rep("^" ~ transpExpr) ^^ {case s ~ l =>
       (s /: l)((x, y) => y match {case "^" ~ e => Pow(x,e)})}
 
+  //todo implement transposition via lexer substitution
   def transpExpr: Parser[MExp] = simpleExpr/*.flatMap {e => {
       val quoteParser = new MatlabParser {
         override val lexical = new MatlabLexical {
@@ -81,11 +92,12 @@ class MatlabParser extends StandardTokenParsers {
 
 
   def simpleExpr: Parser[MExp] = (
-    ident ^^ Var
+    ident ~ ("(" ~> repsep(expr, ",") <~ ")") ^^ {case n ~ args => MCall(Id(n), args)}
   | floatLiteral
   | intLiteral
   | "(" ~> expr <~ ")"
   | stringLit ^^ MString
+  | ident ^^ Var
   )
 
   def intLiteral: Parser[IntNum] =
@@ -97,7 +109,7 @@ class MatlabParser extends StandardTokenParsers {
 
 
   // Scanner is imported from STLCLexer, which is an inheritor of Scanners
-  def parse(input: String): ParseResult[MSeq] = program(new lexical.Scanner(input)) match {
+  def parse(input: String): ParseResult[MStmt] = program(new lexical.Scanner(input)) match {
     case _ : Error => Failure("unknown failure", new lexical.Scanner(input))
     case Success(_, in) if !in.atEnd => Failure("Non fully parsed", in)
     case s => s

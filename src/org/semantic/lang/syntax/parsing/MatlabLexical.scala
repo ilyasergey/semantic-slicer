@@ -21,6 +21,8 @@ class MatlabLexical extends StdLexical with MatlabTokens {
     )
 
 
+  override def letter = elem("letter", (x => x.isLetter || (x == '_')))
+
   override def whitespace = rep(
     whitespaceChar
     | comment

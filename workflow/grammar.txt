@@ -3,13 +3,23 @@
 
 MProgram    ::=   MSeq
 
-MSeq        ::=   MStmt {";" MStmt}
+MSeq        ::=   MStmt {Separators MStmt} Separators?
+
+Separators  ::=   ";" {";"}
 
 MStmt       ::=   Assign
                 | IfStmt
                 | Expr
 
-Expr        ::=   AddExpr
+Assign      ::=   Id "=" Expr
+
+Expr        ::=   EqualExpr
+
+EqualExpr         RangeExpr
+                | EqualExpr ("==" | ">=" | "<=" | "<" | ">") RangeExpr
+
+RangeExpr   ::=   AddExpr
+                | AddExpr : AddExpr
 
 AddExpr     ::=   MultExpr
                 | AddExpr ("+" | "-") MultExpr
@@ -20,9 +30,11 @@ MultExpr    :: =  PowerExpr
 PowerExpr   ::=   SimpleExpr
                 | PowerExpr "^" SimpleExpr
 
-SimpleExpr  ::=   Var
+SimpleExpr  ::= | Call
+                | Var
                 | FloatLiteral
                 | IntegerLiteral
                 | StringLiteral
                 | "(" Expr ")"
 
+Call        ::=   Id "(" Expr? {"," Expr} ")"

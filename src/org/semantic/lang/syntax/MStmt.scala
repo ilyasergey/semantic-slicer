@@ -10,7 +10,6 @@ package org.semantic.lang.syntax
 /**
  * Sequence of statements
  */
-case class MSeq(ss: Seq[MStmt])
 
 
 /**
@@ -18,7 +17,9 @@ case class MSeq(ss: Seq[MStmt])
  */
 abstract class MStmt
 
-case class IfStmt(c: MExp, thenBranch: MSeq, elseBranches: Seq[MSeq]) extends MStmt
+case class MSeq(ss: Seq[MStmt]) extends MStmt
+
+case class IfStmt(c: MExp, thenBranch: MStmt, elseBranches: Seq[MStmt]) extends MStmt
 
 case class While(c: MExp, b: MStmt) extends MStmt
 

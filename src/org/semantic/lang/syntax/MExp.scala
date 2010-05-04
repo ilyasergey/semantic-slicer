@@ -21,9 +21,10 @@ case class Sub(l: MExp, r: MExp) extends MExp
 case class Mul(l: MExp, r: MExp) extends MExp
 case class Div(l: MExp, r: MExp) extends MExp
 case class Pow(l: MExp, r: MExp) extends MExp
+case class Range(l: MExp, r: MExp) extends MExp
 case class Transp(e: MExp) extends MExp
 
 /**
  * Function call
  */
-case class FCall(name: Id, args: Seq[MExp]) extends MExp
+case class MCall(name: Id, args: Seq[MExp]) extends MExp

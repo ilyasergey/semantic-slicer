@@ -5,12 +5,12 @@ TODO list for semantic slicing project
     Syntax:
        while,
        for
-       function calls
+       ranges
        -------------
        transposition
        dot-notation
        functions
-       
+
 
 2. Reference binding for local variables
 3. Simple data flow for reaching definitions
