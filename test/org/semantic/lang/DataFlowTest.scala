@@ -11,6 +11,19 @@ class DataFlowTest extends FunSuite {
   import org.semantic.lang.syntax._
   import org.semantic.lang.dfa.DataFlow._
 
+  /*
+  * {                     (prog)
+  *     y = v             (s1)
+  *     z = y             (s2)
+  *     x = v             (s3)
+  *     while x           (s4, s41)
+  *         x = w         (s411)
+  *         x = v         (s412)
+  *     end
+  *     return x          (s5)
+  * }
+  */
+
   val input = """
        y = v
        z = y
@@ -49,6 +62,10 @@ class DataFlowTest extends FunSuite {
 
   test("in (s1)") {
     expect(Set(Var("w"), Var("v")))(in(s1))
+  }
+
+  test("out (s4)") {
+    expect(Set(Var("x"), Var("w"), Var("v")))(out(s4))
   }
 
 

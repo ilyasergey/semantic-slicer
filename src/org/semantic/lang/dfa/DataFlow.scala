@@ -103,7 +103,10 @@ trait Variables {
 trait VariablesImpl extends Variables {
   val uses: MStmt ==> Set[Var] =
   attr {
-    case v@Var("s") => Set(v)
+    case v@Var(_) => Set(v)
+    case Asgn(_, e) => e -> uses
+    case IfStmt(tb, _) => (Set[Var]() /: tb.map(_._1))((s, e) => s ++ uses(e))
+    case While(c, _) => c -> uses
     case _ => Set()
   }
 
