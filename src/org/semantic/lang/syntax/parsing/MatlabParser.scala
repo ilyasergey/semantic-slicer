@@ -104,7 +104,7 @@ class MatlabParser extends StandardTokenParsers {
 
 
   def simpleExpr: Parser[MExp] = (
-    ident ~ ("(" ~> optnl ~> repsep(expr, optnl ~> "," <~ optnl) <~ optnl <~ ")") ^^ {case n ~ args => MCall(Id(n), args)}
+    ident ~ ("(" ~> optnl ~> repsep(expr, optnl ~> "," <~ optnl) <~ optnl <~ ")") ^^ {case n ~ args => MCall(Var(n), args)}
   | floatLiteral
   | intLiteral
   | "(" ~> expr <~ ")"

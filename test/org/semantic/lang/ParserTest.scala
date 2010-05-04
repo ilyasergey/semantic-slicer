@@ -27,8 +27,8 @@ class ParserTest extends MatlabParser with Spec with ShouldMatchers {
               lb = lb - 1;
           end
           """
-      val out = "While(Conj(Equal(Var(lb),IntNum(1)),Equal(MCall(Id(af),List(Sub(Var(lb),IntNum(1))))," +
-              "MCall(Id(af),List(Var(lb))))),Asgn(Id(lb),Sub(Var(lb),IntNum(1))))"
+      val out = "While(Conj(Equal(Var(lb),IntNum(1)),Equal(MCall(Var(af),List(Sub(Var(lb),IntNum(1))))," +
+              "MCall(Var(af),List(Var(lb))))),Asgn(Id(lb),Sub(Var(lb),IntNum(1))))"
       strEqual(in, out)
     }
 
@@ -41,11 +41,11 @@ class ParserTest extends MatlabParser with Spec with ShouldMatchers {
             end
           end
           """
-      val out = "ForStmt(Asgn(Id(f),Range(MCall(Id(max),List(MCall(Id(floor),List(Div(Var(res),IntNum(3)))), " +
-              "IntNum(1))),MCall(Id(length),List(Var(af))))),IfStmt(List((Disj(Equal(Var(res),IntNum(1))," +
-              "Conj(Conj(Equal(Mul(Var(threshold),Var(M)),MCall(Id(af),List(Var(f)))),Disj(Equal(Var(f)," +
-              "Var(lb)),Equal(Var(f),Var(ub)))),MCall(Id(not),List(Disj(Equal(MCall(Id(mod),List(Var(f), Var(res)))," +
-              "IntNum(2)),Equal(Sub(Var(res),MCall(Id(mod),List(Var(f), Var(res)))),IntNum(2)))))))," +
+      val out = "ForStmt(Asgn(Id(f),Range(MCall(Var(max),List(MCall(Var(floor),List(Div(Var(res),IntNum(3)))), " +
+              "IntNum(1))),MCall(Var(length),List(Var(af))))),IfStmt(List((Disj(Equal(Var(res),IntNum(1))," +
+              "Conj(Conj(Equal(Mul(Var(threshold),Var(M)),MCall(Var(af),List(Var(f)))),Disj(Equal(Var(f)," +
+              "Var(lb)),Equal(Var(f),Var(ub)))),MCall(Var(not),List(Disj(Equal(MCall(Var(mod),List(Var(f), Var(res)))," +
+              "IntNum(2)),Equal(Sub(Var(res),MCall(Var(mod),List(Var(f), Var(res)))),IntNum(2)))))))," +
               "MSeq(List(Asgn(Id(bool),IntNum(0)), Return)))),None))"
       strEqual(in, out)
     }
@@ -58,8 +58,8 @@ class ParserTest extends MatlabParser with Spec with ShouldMatchers {
             note = round(note);
           end
           """
-      val out = "IfStmt(List((Equal(MCall(Id(abs),List(Sub(Var(note),Var(note_prev)))),FloatNum(0.20000000298023224))," +
-              "Asgn(Id(note),Var(note_prev)))),Some(Asgn(Id(note),MCall(Id(round),List(Var(note))))))"
+      val out = "IfStmt(List((Equal(MCall(Var(abs),List(Sub(Var(note),Var(note_prev)))),FloatNum(0.20000000298023224))," +
+              "Asgn(Id(note),Var(note_prev)))),Some(Asgn(Id(note),MCall(Var(round),List(Var(note))))))"
       strEqual(in, out)
     }
 
@@ -68,7 +68,7 @@ class ParserTest extends MatlabParser with Spec with ShouldMatchers {
           wcof = cof(iw_min:iw_max  ,
                      l);         % interpolation coefficients
           """
-      val out = "Asgn(Id(wcof),MCall(Id(cof),List(Range(Var(iw_min),Var(iw_max)), Var(l))))"
+      val out = "Asgn(Id(wcof),MCall(Var(cof),List(Range(Var(iw_min),Var(iw_max)), Var(l))))"
       strEqual(in, out)
     }
 
