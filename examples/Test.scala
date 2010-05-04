@@ -1,6 +1,4 @@
-package org.semantic.lang
-
-import syntax.parsing.MatlabParser
+import org.semantic.lang.syntax.parsing.MatlabParser
 
 /**
  * @author ilyas
