@@ -7,11 +7,11 @@ import syntax.parsing.MatlabParser
  * @author ilyas
  */
 
-class ControlFlowTest extends FunSuite {
+class DataFlowTest extends FunSuite {
   import org.semantic.lang.syntax._
-  import org.semantic.lang.controlFlow._
+  import org.semantic.lang.dfa.DataFlow._
 
-  test("test 1") {
+  test("Test simple CFA") {
     val in = """
        y = v
        z = y
@@ -33,9 +33,16 @@ class ControlFlowTest extends FunSuite {
     val s41 = MSeq(List(s411, s412))
     val s4 = While(Var("x"), s41)
     val s5 = MCall(Var("foo"), List(Var("x")))
-    val prog = MSeq(List (s1, s2, s3, s4, s5))
+    val prog = MSeq(List(s1, s2, s3, s4, s5))
 
-    assert(tree == prog)
+    // check tree
+    expect(tree)(prog)
+
+    // Check successors
+    expect(Set(s3))(succ(s2))
+    expect(Set(s2))(succ(s1))
+    expect(Set(s4))(succ(s412))
+    expect(Set(s5, s41))(succ(s4))
 
   }
 

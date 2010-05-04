@@ -1,4 +1,4 @@
-package org.semantic.lang.controlFlow
+package org.semantic.lang.dfa
 
 import kiama.attribution.DynamicAttribution._
 import org.semantic.lang.syntax._
@@ -100,3 +100,5 @@ trait Variables {
   val defines: MStmt ==> Set[Id]
 }
 
+
+object DataFlow extends /*LivenessImpl with VariablesImpl with*/ ControlFlowImpl
