@@ -9,13 +9,26 @@ Separators  ::=   ";" {";"}
 
 MStmt       ::=   Assign
                 | IfStmt
+                | ForStmt
                 | Expr
+                | "return"
+                | "break"
+                | "continue"
+
+ForStmt     ::=  "for" Assign ","? MSeq "end"
+
+IfStmt      ::=  "if" Expr ","? MSeq {"elseif" Expr ","? MSeq} ("else" MSeq)? "end"
+
+While       ::=  "while" Expr ","? MSeq "end"
 
 Assign      ::=   Id "=" Expr
 
-Expr        ::=   EqualExpr
+Expr        ::=   LogicExpr
 
-EqualExpr         RangeExpr
+LogicExpr   ::=   EqualExpr
+                | LogicExpr ("||" | "&&") EqualExpr
+
+EqualExpr   ::=   RangeExpr
                 | EqualExpr ("==" | ">=" | "<=" | "<" | ">") RangeExpr
 
 RangeExpr   ::=   AddExpr

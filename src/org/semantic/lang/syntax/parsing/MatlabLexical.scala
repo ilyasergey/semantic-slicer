@@ -28,5 +28,9 @@ class MatlabLexical extends StdLexical with MatlabTokens {
     | comment
     )
 
+  override def whitespaceChar = elem("space char", ch => ch <= ' ' && !newlineChar(ch) && ch != EofCh)
+
+  def newlineChar(ch: Char) = ch == '\n' || ch == '\r'
+
   override protected def comment = '%' ~ rep(chrExcept(EofCh, '\n'))
 }

@@ -11,14 +11,14 @@ class MatlabParser extends StandardTokenParsers {
   override val lexical = new MatlabLexical
   import lexical._
 
-  lexical.delimiters += ("(", ")", "=", ".", "[", "]", ";", ":",
-          ",", "*", "/", "+", "-", "^", "==", "<=", ">=", ">", "<")
+  lexical.delimiters += ("(", ")", "=", ".", "[", "]", ";", ":", "||", "&&",
+          ",", "*", "/", "+", "-", "^", "==", "<=", ">=", ">", "<", "\n", "\r")
 
   lexical.reserved += ("function", "for", "end", "if",
-          "else", "elseif", "continue", "while", "break")
+          "else", "elseif", "continue", "while", "break", "return", "break", "continue")
 
   def program: Parser[MStmt] = (
-    seq
+    opt(separators) ~> seq <~ opt(separators)
   )
 
   /**
@@ -29,51 +29,63 @@ class MatlabParser extends StandardTokenParsers {
     case x => MSeq(s :: x)
   }}
 
-  def separators: Parser[Any] = rep1(";")
+  def separators: Parser[Any] = rep1(";" | newline)  
+
+  def newline: Parser[Any] = rep1("\n" | "\r")
+  def optnl: Parser[Any] = opt(newline)
+
+  def asgn: Parser[Asgn] = (ident <~ "=") ~ expr ^^ {case i ~ e => Asgn(Id(i), e)}
 
   def stmt : Parser[MStmt] = (
-      (ident <~ "=") ~ expr ^^ {case i ~ e => Asgn(Id(i), e)}
-  ||| ("if" ~> expr <~ opt(",")) ~ seq ~ rep("elseif" ~> seq) ~ opt("else" ~> seq) <~ "end" ^^ {
-      case cond ~ tb ~ List(elseIfBranches @ _*) ~ elseBranch => {
-        val lastElseBranch = elseBranch match {
-          case Some(eb) => Seq(eb)
-          case None => Seq()
+      asgn
+  ||| ("if" ~> expr <~ opt(",") <~ optnl) ~ seq ~ rep(("elseif" ~> optnl ~> expr <~ opt(",") <~ optnl) ~ seq) ~
+              opt("else" ~> optnl ~> seq) <~ "end" ^^ {
+        case cond ~ tb ~ thenBranches ~ elseBranch => {
+          val tbx = (cond, tb) :: (thenBranches map {case x ~ y => (x,y)})
+          IfStmt(tbx, elseBranch)
         }
-        IfStmt(cond, tb, elseIfBranches ++ lastElseBranch)
+
       }
-    }
+  ||| ("for" ~> optnl ~> asgn <~ opt(",") <~ optnl) ~ seq <~ "end"  ^^ {case a ~ s => ForStmt(a, s)}
+  ||| ("while" ~> optnl ~> expr <~ opt(",") <~ optnl) ~ seq <~ "end"  ^^ {case a ~ s => While(a, s)}
+  ||| "return" ^^^ Return
+  ||| "break" ^^^ Break
+  ||| "continue" ^^^ Continue
   ||| expr
   )
 
-  def expr: Parser[MExp] = (
-    equalExpr
-  )
+  def expr: Parser[MExp] = logicExpr
 
-  def equalExpr: Parser[MExp] = rangeExpr ~ rep(("==" | ">=" | "<=" | "<" | ">") ~ rangeExpr) ^^ {case s ~ l =>
+  def logicExpr: Parser[MExp] = {
+    def conj = equalExpr ~ rep("&&" ~> optnl ~> equalExpr) ^^ {case s ~ l => (s /: l)(Conj)}
+    conj ~ rep("||" ~> optnl ~> conj) ^^ {case s ~ l => (s /: l)(Disj)}
+  }
+
+  def equalExpr: Parser[MExp] = rangeExpr ~ rep((("==" | ">=" | "<=" | "<" | ">") <~ optnl) ~ rangeExpr) ^^ {case s ~ l =>
     (s /: l)((x, y) => y match {
       case _ ~ e => Equal(x, e)
     })
   }
 
   def rangeExpr: Parser[MExp] = (addExpr
-  ||| (addExpr <~ ":") ~ addExpr ^^ {case e1 ~ e2 => Range(e1, e2)}
+  ||| (addExpr <~ ":" <~ optnl) ~ addExpr ^^ {case e1 ~ e2 => Range(e1, e2)}
   )
 
-  def addExpr: Parser[MExp] = multExpr ~ rep(("+" | "-") ~ multExpr) ^^ {case s ~ l =>
+  def addExpr: Parser[MExp] = multExpr ~ rep((("+" | "-") <~ optnl) ~ multExpr) ^^ {case s ~ l =>
     l.foldLeft(s)((x, y) => y match {
       case "+" ~ e => Add(x, e)
       case "-" ~ e => Sub(x, e)
     })
   }
 
-  def multExpr: Parser[MExp] = powerExpr ~ rep(("*" | "/") ~ powerExpr) ^^ {case s ~ l =>
+  def multExpr: Parser[MExp] = powerExpr ~ rep((("*" | "/") <~ optnl) ~ powerExpr) ^^ {case s ~ l =>
     l.foldLeft(s)((x, y) => y match {
       case "*" ~ e => Mul(x, e)
       case "/" ~ e => Div(x, e)
     })
   }
 
-  def powerExpr: Parser[MExp] = transpExpr ~ rep("^" ~ transpExpr) ^^ {case s ~ l =>
+  def powerExpr: Parser[MExp] = transpExpr ~ rep(("^" <~ optnl) ~ transpExpr) ^^ {case s ~ l =>
       (s /: l)((x, y) => y match {case "^" ~ e => Pow(x,e)})}
 
   //todo implement transposition via lexer substitution
@@ -92,7 +104,7 @@ class MatlabParser extends StandardTokenParsers {
 
 
   def simpleExpr: Parser[MExp] = (
-    ident ~ ("(" ~> repsep(expr, ",") <~ ")") ^^ {case n ~ args => MCall(Id(n), args)}
+    ident ~ ("(" ~> optnl ~> repsep(expr, optnl ~> "," <~ optnl) <~ optnl <~ ")") ^^ {case n ~ args => MCall(Id(n), args)}
   | floatLiteral
   | intLiteral
   | "(" ~> expr <~ ")"
