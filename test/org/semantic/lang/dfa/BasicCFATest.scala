@@ -9,7 +9,7 @@ import parsing.MatlabParser
  */
 
 trait BasicCFATest extends FunSuite {
-    /*
+  /*
   * {                     (prog)
   *     y = v             (s1)
   *     z = y             (s2)

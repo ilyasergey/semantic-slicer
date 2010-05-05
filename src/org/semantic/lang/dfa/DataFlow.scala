@@ -19,6 +19,11 @@ trait ControlFlow {
    */
   val succ: MStmt ==> Set[MStmt]
 
+  /**
+   * Control flow predcessor relation.
+   */
+  val pred: MStmt ==> Set[MStmt]
+
 
   /**
    * Control flow default successor relation.
@@ -46,6 +51,15 @@ trait ControlFlowImpl extends ControlFlow {
     case MSeq(s :: _) => Set(s)
     case Return => Set()
     case s => s -> following
+  }
+
+  // todo it's just a fake
+  // todo reimplement me!!!
+  val pred: MStmt ==> Set[MStmt] = childAttr {
+    case s => {
+      case seq: MSeq if s.prev != null => Set(s.prev)
+      case _ => Set()
+    }
   }
 
   val following: MStmt ==> Set[MStmt] = childAttr {
@@ -152,4 +166,4 @@ trait LivenessImpl extends Liveness {
 }
 
 
-object DataFlow extends LivenessImpl with VariablesImpl with ControlFlowImpl
+object DataFlow extends LivenessImpl with VariablesImpl with ControlFlowImpl with ReachingDefinitionsImpl

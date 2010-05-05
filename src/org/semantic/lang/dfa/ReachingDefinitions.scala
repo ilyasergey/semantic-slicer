@@ -2,8 +2,6 @@ package org.semantic.lang.dfa
 
 import kiama.attribution.DynamicAttribution._
 import org.semantic.lang.syntax._
-import kiama.attribution.Attributable
-
 
 /**
  * @author ilyas
@@ -14,7 +12,7 @@ trait Assignments {
   /**
    * Assignments
    */
-  val defines: MStmt ==> Set[Asgn]
+  val assigns: MStmt ==> Set[Asgn]
 }
 
 trait AssignmentsImpl extends Assignments {
@@ -33,13 +31,22 @@ trait ReachingDefinitions {
    */
   val reach: MStmt ==> Set[Asgn]
 
+
 }
 
 trait ReachingDefinitionsImpl extends ReachingDefinitions
         with ControlFlowImpl with AssignmentsImpl {
-
-  val reach: MStmt ==> Set[Asgn] = circular(Set[Asgn]()) {
-    case s => assigns(s)
+  val reach: MStmt ==> Set[Asgn] =
+  circular(Set[Asgn]()) {
+    case s => assigns(s) ++ outAsgn(s)
   }
+
+  private val outAsgn: MStmt ==> Set[Asgn] =
+  circular(Set[Asgn]()) {
+    case s => {
+      s -> pred flatMap (reach)
+    }
+  }
+
 
 }
