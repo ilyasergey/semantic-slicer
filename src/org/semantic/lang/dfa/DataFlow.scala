@@ -128,11 +128,17 @@ trait Liveness {
 
   /**
    * Variables "live" into a statement.
+   *
+   * in (s) contains all variables that have values that are defined before s 
+   * and are used either in s or in later statements without first being redefined
    */
   val in: MStmt ==> Set[Var]
 
   /**
    * Variables "live" out of a statement.
+   *
+   * out (s) contains all variables whose values either pass through s
+   * or are defined by s and are used later without first being redefined
    */
   val out: MStmt ==> Set[Var]
 
@@ -151,6 +157,7 @@ trait LivenessImpl extends Liveness {
 
   val out: MStmt ==> Set[Var] =
   circular(Set[Var]()) {
+    // For all successors s compute in(s) --- this will be `local' out of current statement 
     case s => (s -> succ) flatMap (in)
   }
 
