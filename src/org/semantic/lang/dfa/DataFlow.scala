@@ -104,6 +104,9 @@ trait VariablesImpl extends Variables {
   val uses: MStmt ==> Set[Var] =
   attr {
     case v@Var(_) => Set(v)
+    case BinaryExp(l, r) => (l -> uses) ++ (r -> uses)
+    case UnaryExp(e) => e -> uses
+    case MCall(v, args) => (v -> uses) ++ (Set[Var]() /: args)((s, e) => s ++ (e -> uses))
     case Asgn(_, e) => e -> uses
     case IfStmt(tb, _) => (Set[Var]() /: tb.map(_._1))((s, e) => s ++ uses(e))
     case While(c, _) => c -> uses

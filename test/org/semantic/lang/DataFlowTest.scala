@@ -61,11 +61,11 @@ class DataFlowTest extends FunSuite {
   }
 
   test("in (s1)") {
-    expect(Set(Var("w"), Var("v")))(in(s1))
+    expect(Set(Var("w"), Var("v"), Var("foo")))(in(s1))
   }
 
   test("out (s4)") {
-    expect(Set(Var("x"), Var("w"), Var("v")))(out(s4))
+    expect(Set(Var("x"), Var("w"), Var("v"), Var("foo")))(out(s4))
   }
 
 

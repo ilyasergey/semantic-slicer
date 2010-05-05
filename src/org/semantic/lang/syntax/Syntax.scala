@@ -18,12 +18,12 @@ case class Id(name: String) extends ASTNode
 /**
  * Statements
  */
-trait MStmt extends ASTNode with Attributable
+sealed trait MStmt extends ASTNode with Attributable
 
 /**
  * Label trait for loops
  */
-trait LoopStmt extends MStmt
+sealed trait LoopStmt extends MStmt
 
 case class MSeq(ss: Seq[MStmt]) extends MStmt
 case class IfStmt(thenBranches: Seq[(MExp, MStmt)], elseBranch: Option[MStmt]) extends MStmt
@@ -37,8 +37,9 @@ case object Continue extends MStmt
 
 
 // todo implement subexpressions!
-abstract class MExp extends MStmt
-abstract case class BinaryExp(_l: MExp, _r: MExp) extends MExp
+sealed abstract class MExp extends MStmt
+sealed abstract case class BinaryExp(_l: MExp, _r: MExp) extends MExp
+sealed abstract case class UnaryExp(_e: MExp) extends MExp
 
 case class IntNum(i: Int) extends MExp
 case class FloatNum(f: Double) extends MExp
@@ -46,8 +47,8 @@ case class MString(s: String) extends MExp
 case class Var(s: String) extends MExp
 
 // Unary
-case class Neg(e: MExp) extends MExp
-case class Transp(e: MExp) extends MExp
+case class Neg(e: MExp) extends UnaryExp(e)
+case class Transp(e: MExp) extends UnaryExp(e)
 
 case class Equal(l: MExp, r: MExp) extends BinaryExp(l, r)
 case class Add(l: MExp, r: MExp) extends BinaryExp(l, r)
