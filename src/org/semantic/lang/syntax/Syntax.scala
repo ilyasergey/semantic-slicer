@@ -29,7 +29,9 @@ case class MSeq(ss: Seq[MStmt]) extends MStmt
 case class IfStmt(thenBranches: Seq[(MExp, MStmt)], elseBranch: Option[MStmt]) extends MStmt
 case class While(c: MExp, b: MStmt) extends MStmt with LoopStmt
 case class ForStmt(a: Asgn, body: MStmt) extends MStmt with LoopStmt
-case class Asgn(name: Var, e: MExp) extends MStmt
+case class Asgn(name: Var, e: MExp) extends MStmt {
+  val tag: Int = Counter.asgnTag
+}
 case class ListAsgn(names: Seq[Var], e: MExp) extends MStmt
 case object Return extends MStmt
 case object Break extends MStmt
@@ -44,7 +46,11 @@ sealed abstract case class UnaryExp(_e: MExp) extends MExp
 case class IntNum(i: Int) extends MExp
 case class FloatNum(f: Double) extends MExp
 case class MString(s: String) extends MExp
-case class Var(s: String) extends MExp
+
+
+case class Var(s: String) extends MExp {
+  val tag: Int = Counter.varTag
+}
 
 // Unary
 case class Neg(e: MExp) extends UnaryExp(e)
@@ -70,3 +76,20 @@ case class MCall(name: Var, args: Seq[MExp]) extends MExp
  * Function definition
  */
 case class MFunction(name: Id, res: Seq[Id], params: Seq[Id])
+
+private[syntax] object Counter {
+  private var varCounter = 0;
+  private var asgnCounter = 0;
+
+  def varTag: Int = {
+    val tmp = varCounter
+    varCounter += 1
+    tmp
+  }
+
+  def asgnTag: Int = {
+    val tmp = asgnCounter
+    asgnCounter += 1
+    tmp
+  }
+}

@@ -1,8 +1,8 @@
-package org.semantic.lang
+package org.semantic.lang.parser
 
-import syntax.parsing.MatlabParser
 import org.scalatest.matchers.ShouldMatchers
 import org.scalatest.Spec
+import org.semantic.lang.syntax.parsing.MatlabParser
 
 /**
  * @author ilyas
