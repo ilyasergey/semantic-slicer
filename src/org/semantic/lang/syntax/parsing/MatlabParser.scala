@@ -31,10 +31,10 @@ class MatlabParser extends StandardTokenParsers {
 
   def separators: Parser[Any] = rep1(";" | newline)  
 
-  def newline: Parser[Any] = rep1("\n" | "\r")
-  def optnl: Parser[Any] = opt(newline)
+  lazy val newline: Parser[Any] = rep1("\n" | "\r")
+  lazy val optnl: Parser[Any] = opt(newline)
 
-  def asgn: Parser[Asgn] = (ident <~ "=") ~ expr ^^ {case i ~ e => Asgn(Var(i), e)}
+  lazy val asgn: Parser[Asgn] = (ident <~ "=") ~ expr ^^ {case i ~ e => Asgn(Var(i), e)}
 
   def stmt : Parser[MStmt] = (
       asgn
@@ -44,7 +44,6 @@ class MatlabParser extends StandardTokenParsers {
           val tbx = (cond, tb) :: (thenBranches map {case x ~ y => (x,y)})
           IfStmt(tbx, elseBranch)
         }
-
       }
   ||| ("for" ~> optnl ~> asgn <~ opt(",") <~ optnl) ~ seq <~ "end"  ^^ {case a ~ s => ForStmt(a, s)}
   ||| ("while" ~> optnl ~> expr <~ opt(",") <~ optnl) ~ seq <~ "end"  ^^ {case a ~ s => While(a, s)}

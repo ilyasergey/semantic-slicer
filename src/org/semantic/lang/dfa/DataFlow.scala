@@ -45,10 +45,6 @@ trait ControlFlowImpl extends ControlFlow {
     case t@While(_, s) => t -> following + s
     case MSeq(s :: _) => Set(s)
     case Return => Set()
-
-    // todo not sure that this is necessary...
-    //    case BinaryExp(l, _) => Set(l)
-    //    case MCall(v, s :: _) => Set(v)
     case s => s -> following
   }
 
@@ -64,14 +60,6 @@ trait ControlFlowImpl extends ControlFlow {
       case t@While(_, _) => Set(t)
       case seq@MSeq(_) if currentNode isLast => seq -> following
       case MSeq(_) => Set(currentNode.next)
-
-      // todo not sure that this is necessary...
-      //      case MCall(v, s :: _) if currentNode eq v => Set(s)
-      //      case c@MCall(_, _) if currentNode isLast => c -> following
-      //      case MCall(_, _) => Set(currentNode.next)
-      //      case b@BinaryExp(_, r) if currentNode eq r => b -> following
-      //      case BinaryExp(l, r) if currentNode eq l => Set(r)
-
       case _ => Set()
     }
   }

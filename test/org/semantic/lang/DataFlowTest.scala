@@ -20,7 +20,7 @@ class DataFlowTest extends FunSuite {
   *         x = w         (s411)
   *         x = v         (s412)
   *     end
-  *     return x          (s5)
+  *     foo(x)            (s5)
   * }
   */
 
