@@ -21,7 +21,12 @@ trait ControlFlow {
   val succ: MStmt ==> Set[MStmt]
 
   /**
-   * Control flow predcessor relation.
+   * Transitive successors
+   */
+  val succTrans: MStmt ==> Set[MStmt]
+
+  /**
+   *  Control flow predcessor relation.
    */
   val pred: MStmt ==> Set[MStmt]
 
@@ -54,8 +59,21 @@ trait ControlFlowImpl extends ControlFlow {
     case s => s -> following
   }
 
-  // todo it's just a fake
-  // todo reimplement me!!!
+  val succTrans: MStmt ==> Set[MStmt] = attr {
+    case s =>
+      import scala.collection.mutable.HashSet
+      val acc = new HashSet[MStmt]
+
+      def collect(stmt: MStmt) {
+        acc ++ succ(stmt)
+        for (s1 <- succ(stmt) if !acc.contains(s1)) {
+          collect(s1)
+        }
+      }
+      collect(s)
+      Set(acc.toSeq: _*)
+  }
+
   val pred: MStmt ==> Set[MStmt] = attr {
     case s => predMap(getRoot(s)).get(s).getOrElse(Set())
   }
@@ -79,11 +97,11 @@ trait ControlFlowImpl extends ControlFlow {
 
     collect(stmt)
 
-/*
-    println("----------------")
-    for (e <- succMap) println (e)
-    println("----------------")
-*/
+    /*
+        println("----------------")
+        for (e <- succMap) println (e)
+        println("----------------")
+    */
 
     import scala.collection.mutable.{HashMap => MuMap}
     val predSet = new MuMap[MStmt, Set[MStmt]]
@@ -138,12 +156,14 @@ trait VariablesImpl extends Variables {
   val uses: MStmt ==> Set[Var] =
   attr {
     case v@Var(_) => Set(v)
+    case MSeq(s) => Set(s.flatMap(uses(_)): _*)
     case BinaryExp(l, r) => (l -> uses) ++ (r -> uses)
     case UnaryExp(e) => e -> uses
     case MCall(v, args) => (v -> uses) ++ (Set[Var]() /: args)((s, e) => s ++ (e -> uses))
     case Asgn(_, e) => e -> uses
-    case IfStmt(tb, _) => (Set[Var]() /: tb.map(_._1))((s, e) => s ++ uses(e))
-    case While(c, _) => c -> uses
+    case IfStmt(tb, eb) => (Set[Var]() /: tb)((s, e) => s ++ uses(e._1) ++ uses(e._2)) ++
+            eb.map(uses(_)).getOrElse(Set())
+    case While(c, s) => (c -> uses) ++ (s -> uses)
     case _ => Set()
   }
 

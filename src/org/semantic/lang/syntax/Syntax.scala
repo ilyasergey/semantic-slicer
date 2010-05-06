@@ -26,6 +26,9 @@ sealed trait MStmt extends ASTNode with Attributable
 sealed trait LoopStmt extends MStmt
 
 case class MSeq(ss: Seq[MStmt]) extends MStmt
+
+case class Selected(sx: Seq[MStmt]) extends MSeq(sx)
+
 case class IfStmt(thenBranches: Seq[(MExp, MStmt)], elseBranch: Option[MStmt]) extends MStmt
 case class While(c: MExp, b: MStmt) extends MStmt with LoopStmt
 case class ForStmt(a: Asgn, body: MStmt) extends MStmt with LoopStmt

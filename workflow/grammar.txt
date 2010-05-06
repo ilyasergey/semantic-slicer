@@ -51,3 +51,5 @@ SimpleExpr  ::= | Call
                 | "(" Expr ")"
 
 Call        ::=   Id "(" Expr? {"," Expr} ")"
+
+Selected    ::=   #begin Mseq? #end

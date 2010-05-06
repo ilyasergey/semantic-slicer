@@ -12,7 +12,9 @@ class MatlabParser extends StandardTokenParsers {
   import lexical._
 
   lexical.delimiters += ("(", ")", "=", ".", "[", "]", ";", ":", "||", "&&",
-          ",", "*", "/", "+", "-", "^", "==", "<=", ">=", ">", "<", "\n", "\r")
+          ",", "*", "/", "+", "-", "^", "==", "<=", ">=", ">", "<", "\n", "\r",
+          "#begin", "#end"
+          )
 
   lexical.reserved += ("function", "for", "end", "if",
           "else", "elseif", "continue", "while", "break", "return", "break", "continue")
@@ -22,7 +24,12 @@ class MatlabParser extends StandardTokenParsers {
   )
 
   /**
-   * Sequence of statements
+   * Selected sequence
+   */
+  def selected: Parser[Selected] = "#begin" ~> optnl ~> seq <~ optnl <~ "#end" ^^ {case MSeq(l) => Selected(l)}
+
+  /**
+   *  Sequence of statements
    */
   def seq: Parser[MStmt] = stmt ~ rep(separators ~> stmt) <~ opt(separators) ^^ {case s ~ l => l match {
     case List() => s
@@ -51,6 +58,7 @@ class MatlabParser extends StandardTokenParsers {
   ||| "break" ^^^ Break
   ||| "continue" ^^^ Continue
   ||| expr
+  ||| selected
   )
 
   def expr: Parser[MExp] = logicExpr
