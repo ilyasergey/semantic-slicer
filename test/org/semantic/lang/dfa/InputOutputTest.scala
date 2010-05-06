@@ -1,7 +1,6 @@
 package org.semantic.lang.dfa
 
 import org.scalatest.FunSuite
-import org.scalatest.FunSuite
 import org.semantic.lang.syntax._
 import parsing.MatlabParser
 
