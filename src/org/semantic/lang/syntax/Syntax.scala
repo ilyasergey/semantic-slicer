@@ -31,6 +31,28 @@ case class While(c: MExp, b: MStmt) extends MStmt with LoopStmt
 case class ForStmt(a: Asgn, body: MStmt) extends MStmt with LoopStmt
 case class Asgn(name: Var, e: MExp) extends MStmt {
   val tag: Int = Counter.asgnTag
+
+  override def equals(obj: Any) = _equals(obj) && (obj match {
+    case v: Asgn => this.tag == v.tag
+    case _ => false
+  })
+
+
+  override def hashCode = {
+    _hashCode * 31 + tag
+  }
+
+
+  private def _hashCode = super.hashCode
+
+  private def _equals(obj: Any) = super.equals(obj)
+  /*
+    def raw = new Asgn(name, e) {
+      override def hashCode = _hashCode
+      override def equals(obj: Any) = _equals(obj)
+    }
+  */
+
 }
 case class ListAsgn(names: Seq[Var], e: MExp) extends MStmt
 case object Return extends MStmt
@@ -50,6 +72,15 @@ case class MString(s: String) extends MExp
 
 case class Var(s: String) extends MExp {
   val tag: Int = Counter.varTag
+
+  /*
+    override def equals(obj: Any) = super.equals(obj) && (obj match {
+      case v:Var => this.tag == v.tag
+      case _ => false
+    })
+
+    override def hashCode = super.hashCode * 31 + tag
+  */
 }
 
 // Unary

@@ -3,6 +3,7 @@ package org.semantic.lang.dfa
 import kiama.attribution.DynamicAttribution._
 import org.semantic.lang.syntax._
 import kiama.attribution.Attributable
+import collection.mutable.Map
 
 
 /**
@@ -55,11 +56,42 @@ trait ControlFlowImpl extends ControlFlow {
 
   // todo it's just a fake
   // todo reimplement me!!!
-  val pred: MStmt ==> Set[MStmt] = childAttr {
-    case s => {
-      case seq: MSeq if s.prev != null => Set(s.prev)
-      case _ => Set()
+  val pred: MStmt ==> Set[MStmt] = attr {
+    case s => predMap(getRoot(s)).get(s).getOrElse(Set())
+  }
+
+  private def getRoot(stmt: MStmt): MStmt = stmt.parent match {
+    case s: MStmt => getRoot(s)
+    case _ => stmt
+  }
+
+  private def predMap(stmt: MStmt): Map[MStmt, Set[MStmt]] = {
+    import scala.collection.mutable.{HashMap => MuMap}
+
+    val succMap = new MuMap[MStmt, Set[MStmt]]
+    def collect(st: MStmt) {
+      val localSuccessors = succ(st)
+      succMap += ((st, localSuccessors))
+      for (suc <- localSuccessors.toList.filter(_.isInstanceOf[MStmt])) {
+        if (!succMap.keySet.contains(suc)) collect((suc))
+      }
     }
+
+    collect(stmt)
+
+/*
+    println("----------------")
+    for (e <- succMap) println (e)
+    println("----------------")
+*/
+
+    import scala.collection.mutable.{HashMap => MuMap}
+    val predSet = new MuMap[MStmt, Set[MStmt]]
+    for ((currentStmt, sucSet) <- succMap; sucStmt <- sucSet) {
+      val tmp = predSet.getOrElseUpdate(sucStmt, Set())
+      predSet.update(sucStmt, tmp + currentStmt)
+    }
+    predSet
   }
 
   val following: MStmt ==> Set[MStmt] = childAttr {

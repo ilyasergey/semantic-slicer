@@ -7,10 +7,9 @@ import org.semantic.lang.syntax._
  */
 
 class ReachingDefsTest extends BasicCFATest {
-
   import DataFlow._
 
- /*
+  /*
   * {                     (prog)
   *     y = v             (s1)
   *     z = y             (s2)
@@ -23,11 +22,17 @@ class ReachingDefsTest extends BasicCFATest {
   * }
   */
 
-
   test("reach (s3)") {
-    expect(Set(Asgn(Var("x"),Var("v")), Asgn(Var("z"),Var("y")), Asgn(Var("y"),Var("v"))))(reach(s3))
+    expect(Set(s1, s2, s3))(reach(s3))
   }
 
+  test("reach (s5)") {
+    expect(Set(s1, s2, s3, s411, s412))(reach(s5))
+  }
+
+  test("reach s411") {
+    expect(Set(s1, s2, s3, s411, s412))(reach(s411))  
+  }
 
 
 }
